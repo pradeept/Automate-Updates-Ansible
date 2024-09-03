@@ -1,0 +1,40 @@
+---
+- name: Keep packages up-to-date
+  hosts: localservers
+  become: true
+  vars:
+    packages:
+      - openssh-server
+      - openssh-client
+      - openssl
+      - iptables
+      - linux-firmware
+
+  tasks:
+    # To automatically install security updates
+    - name: Turn on unattended-service
+      service:
+        name: unattended-upgrades.service
+        state: started
+
+    # Remove locks if there are any
+    - name: Remove apt lock file
+      file:
+        state: absent
+        path: "{{ item }}"
+      loop:
+        - "/var/lib/dpkg/lock"
+        - "/var/lib/dpkg/lock-frontend"
+
+    # Update apt cache
+    - name: Update apt Cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    #Loop through packages and upgrade one-by-one
+    - name: Update packages
+      apt:
+        name: "{{ item}}"
+        only_upgrade: yes
+      loop: "{{ packages }}"

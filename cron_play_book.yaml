@@ -1,0 +1,14 @@
+---
+- name: Schedule auto update playbook execution
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: cronjob
+      cron:
+        backup: true
+        hour: 0
+        minute: 0
+        name: "Run update playbook"
+        job: "ansible-playbook --vault-password-file ~/Documents/automate_updates/vault_secret.sh -i ~/Documents/automate_updates/inventory.ini ~/Documents/automate_updates/playbook.yaml >> ~/Documents/automate_updates/logs/update_job.log 2>&1"
+        state: "present"
